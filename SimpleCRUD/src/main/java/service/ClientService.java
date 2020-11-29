@@ -2,10 +2,9 @@ package service;
 
 import java.util.UUID;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import dao.ClientDAO;
 import model.Client;
@@ -25,6 +24,7 @@ public class ClientService {
 	}
 
 	public Object add(Request request, Response response) {
+		Object resp = null;
 
 		String nome = request.queryParams("nome");
 		String endereco = request.queryParams("endereco");
@@ -39,9 +39,15 @@ public class ClientService {
 
 		dao.add(client);
 
-        response.status(201); // 201 Created
+		response.status(201); // 201 Created
+		
+		JSONObject json = new JSONObject();
+		json.put("id", id);
+		json.put("nome", client.getNome());
+
+		resp = json;
         
-        return Integer.valueOf(id);
+        return resp;
 	}
 
 	public Object get(Request request, Response response) {
@@ -92,7 +98,7 @@ public class ClientService {
     	    response.header("Content-Type", "application/json");
             response.header("Content-Encoding", "UTF-8");
             String notFoundString = String.format("Cliente ID = '%s' não encontrado",id);
-            resp = ServiceException(notFoundString).add("id", id).toJson();
+            resp = new ServiceException(notFoundString).add("id", id).toJson();
         }
 
         return resp;
@@ -121,7 +127,7 @@ public class ClientService {
     	    response.header("Content-Type", "application/json");
     	    response.header("Content-Encoding", "UTF-8");
             String notFoundString = String.format("Cliente ID = '%s' não encontrado",id);
-            resp = ServiceException(notFoundString).add("id", id).toJson();
+            resp = new ServiceException(notFoundString).add("id", id).toJson();
         }
 
         return resp;

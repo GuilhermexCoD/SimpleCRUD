@@ -8,7 +8,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import model.Client;
 
@@ -23,7 +22,8 @@ public class ClientDAO {
 	public ClientDAO(String filename) throws IOException {
 
 		file = new File(filename);
-        clients = new ArrayList<Client>();
+		clients = new ArrayList<Client>();
+		
         //TODO if the files doesnt exists
 		if (file.exists()) {
 			readFromFile();

@@ -1,5 +1,7 @@
 package model;
 
+import org.json.JSONObject;
+
 import Interfaces.I_Json;
 
 public class Client implements I_Json{
