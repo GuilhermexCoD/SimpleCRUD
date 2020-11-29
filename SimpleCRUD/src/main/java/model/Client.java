@@ -1,8 +1,10 @@
 package model;
 
-public class Client {
+import Interfaces.I_Json;
 
-    private int id;
+public class Client implements I_Json{
+
+    private String id;
     private String nome;
     private String endereco;
     private String celular;
@@ -13,7 +15,7 @@ public class Client {
         this(null, null, null, null, null, null);
     }
 
-    public Client(int id,String nome,String endereco,String celular,String email,String cpf){
+    public Client(String id,String nome,String endereco,String celular,String email,String cpf){
         
         setId(id);
         setNome(nome);
@@ -24,11 +26,11 @@ public class Client {
 
     }
 
-    public int getId(){
+    public String getId(){
         return this.id;
     }
 
-    public void setId(int id){
+    public void setId(String id){
         this.id = id;
     }
 
@@ -72,8 +74,18 @@ public class Client {
         this.cpf = cpf;
     }
 
-    //TODO Implement interface I_Json
-
+    //I_Json Interface
+    @Override
+    public JSONObject toJson(){
+        JSONObject obj = new JSONObject();
+		obj.put("id", this.getId());
+		obj.put("nome", this.getNome());
+		obj.put("endereco", this.getEndereco());
+		obj.put("celular", this.getCelular());
+		obj.put("email", this.getEmail());
+		obj.put("cpf", this.getCpf());
+		return obj;
+    }
     //Override da Classe Object
 
     @Override
