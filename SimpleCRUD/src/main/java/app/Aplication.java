@@ -1,6 +1,8 @@
 package app;
 
 import static spark.Spark.*;
+import spark.Filter;
+
 import service.ClientService;
 
 public class Aplication {
@@ -11,6 +13,11 @@ public class Aplication {
 		
 		//API runnig on port 
 		port(6790);
+
+		after((Filter) (request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Allow-Methods", "GET");
+        });
 		
 		// return fields: id,nome 
         post("/api/clientes", (request, response) -> clientService.add(request, response));

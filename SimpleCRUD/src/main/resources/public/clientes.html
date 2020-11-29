@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <!-- Fontawesome -->
+    <script src="https://kit.fontawesome.com/878d6dedc9.js" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="style.css">
+
+    <title>Simple CRUD Clientes</title>
+
+
+</head>
+
+
+<script type="text/javascript">
+
+    window.onload = function () {
+        buildClientTable('clients');
+    }
+
+    function addIdToPath(form_name) {
+        var your_form = document.getElementById(form_name);
+        var id = your_form.elements.namedItem("id").value;
+        var action_src = "http://localhost:6790/api/clientes/" + id;
+        your_form.action = action_src;
+    }
+
+    function buildClientTable(id) {
+        console.log("Carregando clientes da API");
+
+        fetch("http://localhost:6790/api/clientes").then(
+            function (response) {
+
+                return response.text().then(function (text) {
+
+                    let table = document.getElementById(id);
+
+                    obj = text;
+                    obj = JSON.parse(obj);
+
+                    for (let i = 0; i < obj.length; i++) {
+                        let row = `
+                        <tr>
+                            <th scope="row">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                                </div>
+                            </th>
+                            <td>${obj[i].nome}</td>
+                            <td>${obj[i].endereco}</td>
+                            <td>${obj[i].celular}</td>
+                            <td>${obj[i].email}</td>
+                            <td>${obj[i].cpf}</td>
+                            <td>
+                                <button type="button" onclick="readClient('${obj[i].id}');" class="btn btn-info">Read</button>
+                                <button type="button" onclick="editClient('${obj[i].id}');" class="btn btn-warning">Edit</button>
+                                <button type="button" onclick="deleteClient('${obj[i].id}');" class="btn btn-danger">Delete</button> 
+                            </td>
+                        </tr>`;
+                        table.innerHTML += row;
+                        console.log(`id: ${obj[i].id}`);
+                    }
+                });
+            });
+
+    }
+
+    function readClient(id){
+        console.log(`read id ${id}`);
+    }
+
+    function editClient(id){
+        console.log(`edit id ${id}`);
+    }
+
+    function deleteClient(id){
+        console.log(`delete id ${id}`);
+    }
+</script>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Clients</a>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link active" href="#">Home <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link active" href="#">Welcome, admin@react-crud.com</a>
+                <a class="nav-item nav-link" href="#">Sign out</a>
+            </div>
+        </div>
+    </nav>
+
+    <p>
+    <h1>All Clients</h1>
+
+    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#CreateClient">
+        <i class="fa fa-trash" aria-hidden="true"></i> Delete Selected Clients
+    </button>
+
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#CreateClient">
+        <i class="fa fa-plus" aria-hidden="true"></i> Create Client
+    </button>
+
+    </p>
+
+    <!-- Modal -->
+    <div class="modal fade" id="CreateClient" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Create a Client</h5>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <!-- Form Create Client-->
+                    <form class="user" action="clientes.html" method="POST" onsubmit="postClient(event)">
+                        <div class="form-group row">
+                            <label for="inputName" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="name" id="name" placeholder="Full name">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputAddress" class="col-sm-2 col-form-label">Address</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="address" id="address" placeholder="Road n°,Neighborhood,City,State,Country">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputAddress" class="col-sm-2 col-form-label">Phone</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="phone" id="phone" placeholder="(xx)xxxxxxxxx">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                            <div class="col-sm-10">
+                                <input type="email" class="form-control" name="email" id="email" placeholder="exemple@company.com">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputAddress" class="col-sm-2 col-form-label">SSN</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="ssn" id="ssn" placeholder="Social Security Number">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" value="Enviar" class="btn btn-primary">Create</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">
+                    <input type="checkbox" id="exampleCheck1">
+                </th>
+                <th scope="col">Name</th>
+                <th scope="col">Address</th>
+                <th scope="col">Phone</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">SSN</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="clients">
+
+        </tbody>
+    </table>
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+
+    <script>
+
+        function postClient(e){
+
+            console.log('Creating Client');
+            
+            e.preventDefault();
+                dados = {
+                    "nome":$("#name").val(),
+                    "endereco":$("#address").val(),
+                    "celular":$("#phone").val(),
+                    "email":$("#email").val(),
+                    "cpf":$("#ssn").val()
+                }
+
+
+                $.post("http://localhost:6790/api/clientes", dados,function (data) {
+                    obj = data;
+                    sucesso("Cadastrado com sucesso!")
+                    window.location.href = 'login.html'; 
+                });
+        }
+
+    </script>
+</body>
+
+</html>
