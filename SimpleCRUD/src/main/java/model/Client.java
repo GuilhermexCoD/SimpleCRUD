@@ -1,11 +1,13 @@
 package model;
 
 import org.json.JSONObject;
+import java.io.Serializable;
 
 import Interfaces.I_Json;
 
-public class Client implements I_Json{
+public class Client implements I_Json,Serializable{
 
+    private static final long serialVersionUID = 1L;
     private String id;
     private String nome;
     private String endereco;
@@ -85,9 +87,16 @@ public class Client implements I_Json{
 		obj.put("endereco", this.getEndereco());
 		obj.put("celular", this.getCelular());
 		obj.put("email", this.getEmail());
-		obj.put("cpf", this.getCpf());
+        obj.put("cpf", this.getCpf());
 		return obj;
     }
+
+    public boolean isClient(String id){
+        boolean resp = (id.equals(this.getId()));
+
+        return resp;
+    }
+
     //Override da Classe Object
 
     @Override

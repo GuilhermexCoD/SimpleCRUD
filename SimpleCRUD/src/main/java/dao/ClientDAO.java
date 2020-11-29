@@ -42,12 +42,16 @@ public class ClientDAO {
 	}
 
 	public Client get(String id) {
-        Client resp = null;
-		for (Client client : clients) {
-			if (id == client.getId()) {
+		Client resp = null;
+
+		for(int i = 0;resp == null && i < clients.size() ;i++){
+			Client client = clients.get(i);
+
+			if (client.isClient(id)) {
 				resp = client;
 			}
 		}
+
 		return resp;
 	}
 

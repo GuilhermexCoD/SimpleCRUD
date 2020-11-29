@@ -66,7 +66,6 @@ public class ClientService {
 
         } else {
             response.status(404); // 404 Not found
-            response.redirect("/notfound.html");
         }
 
         return resp;
