@@ -11,7 +11,20 @@
 
     <!-- Fontawesome -->
     <script src="https://kit.fontawesome.com/878d6dedc9.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
+    <script src="https://code.jquery.com/jquery-3.5.1.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js"
+        integrity="sha512-0XDfGxFliYJPFrideYOoxdgNIvrwGTLnmK20xZbCAvPfLGQMzHUsaqZK8ZoH+luXGRxTrS46+Aq400nCnAT0/w=="
+        crossorigin="anonymous"></script>
     <link rel="stylesheet" href="style.css">
 
     <title>Simple CRUD Clientes</title>
@@ -23,15 +36,25 @@
 <script type="text/javascript">
 
     window.onload = function () {
+        var editClientObj;
+
         buildClientTable('clients');
+
+        $('#deleteSelectedBtn').prop('disabled', true); //TO DISABLED
 
     }
 
-    function addIdToPath(form_name) {
-        var your_form = document.getElementById(form_name);
-        var id = your_form.elements.namedItem("id").value;
-        var action_src = "http://localhost:6790/api/clientes/" + id;
-        your_form.action = action_src;
+    function inputPhone(idPhone) {
+        var telefone = $(idPhone).val();
+        telefone = telefone.replace("(", "")
+        telefone = telefone.replace(")", "")
+        telefone = telefone.replace("-", "")
+        telefone = telefone.replace(" ", "")
+        if (telefone.length < 11) {
+            $(idPhone).mask("(99) 9999-99990")
+        } else {
+            $(idPhone).mask("(99) 99999-9999")
+        }
     }
 
     function buildClientTable(tableId) {
@@ -55,19 +78,18 @@
                                     <input type="checkbox" class="form-check-input" id="exampleCheck1">
                                 </div>
                             </th>
-                            <td>${obj[i].nome}</td>
-                            <td>${obj[i].endereco}</td>
-                            <td>${obj[i].celular}</td>
-                            <td>${obj[i].email}</td>
-                            <td>${obj[i].cpf}</td>
+                            <td class="name" >${obj[i].nome}</td>
+                            <td class="address" >${obj[i].endereco}</td>
+                            <td class="phone" >${obj[i].celular}</td>
+                            <td class="email" >${obj[i].email}</td>
+                            <td class="ssn">${obj[i].cpf}</td>
                             <td>
                                 <button type="button" data-toggle="modal" data-target="#ReadClient" onclick="readClient('${obj[i].id}')" class="btn btn-info">Read</button>
-                                <button type="button" onclick="editClient('${obj[i].id}');" class="btn btn-warning">Edit</button>
+                                <button type="button" onclick="editClient(event,'${obj[i].id}');" data-toggle="modal" data-target="#UpdateClientForm" class="btn btn-warning">Edit</button>
                                 <button type="button" onclick="deleteClient('${obj[i].id}');" class="btn btn-danger">Delete</button> 
                             </td>
                         </tr>`;
                         table.innerHTML += row;
-                        console.log(`id: ${obj[i].id}`);
                     }
                 });
             });
@@ -91,12 +113,53 @@
 
         $.post("http://localhost:6790/api/clientes", dados, function (data) {
             obj = data;
-            sucesso("Cadastrado com sucesso!")
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'success',
+                title: 'Cadastrado com sucesso!'
+            })
+
+        });
+    }
+
+    function putClient(e) {
+
+        console.log(`Updating Client id: ${editClientObj.id}`);
+
+        e.preventDefault();
+
+        dados = {
+            "nome": $("#putName").val(),
+            "endereco": $("#putAddress").val(),
+            "celular": $("#putPhone").val(),
+            "email": $("#putEmail").val(),
+            "cpf": $("#putSsn").val()
+        }
+
+        $.ajax({
+            url: `http://localhost:6790/api/clientes/${editClientObj.id}`,
+            type: 'PUT',
+            data: `nome=${dados.nome}&endereco=${dados.endereco}&celular=${dados.celular}&email=${dados.email}&cpf=${dados.cpf}`,
+        }).done(function (result) {
+            obj = result;
+            obj = JSON.parse(obj);
+
         });
     }
 
     function readClient(id) {
-        console.log(`read id ${id}`);
+        console.log(`Reading Client id ${id}`);
 
         fetch(`http://localhost:6790/api/clientes/${id}`).then(
             function (response) {
@@ -105,8 +168,6 @@
 
                     obj = text;
                     obj = JSON.parse(obj);
-
-                    console.log(obj);
 
                     readTitle.innerText = obj.nome;
 
@@ -121,31 +182,47 @@
             });
     }
 
-    function editClient(id) {
-        console.log(`edit id ${id}`);
+    function editClient(event, id) {
+        console.log(`Editing Client with id:${id}`);
+
+        editClientObj = {
+            "id": id
+        }
+
     }
 
     function deleteClient(id) {
-        console.log(`delete id ${id}`);
+        console.log(`Deleting Client with id: ${id}`);
 
-        fetch(`http://localhost:6790/api/clientes/${id}`,{
-            method: 'DELETE',
-            headers: {
-                'Content-type': 'application/json',
-                'Access-Control-Allow-Methods': 'DELETE'
-            }
-        }).then(
-            function (response) {
+        Swal.fire({
+            title: 'Deseja mesmo deletar o usuário?',
+            text: "Você não poderá reverter isso!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, deletar!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `http://localhost:6790/api/clientes/${id}`,
+                    type: 'DELETE',
+                    success: function (result) {
+                        obj = result;
+                        obj = JSON.parse(obj);
 
-                return response.text().then(function (text) {
+                        Swal.fire(
+                            'Sucesso!',
+                            'Deletado com sucesso!',
+                            'success'
+                        )
 
-                    obj = text;
-                    obj = JSON.parse(obj);
-
-                    console.log(`Delete: ${obj}`);
-
+                    }
                 });
-            });
+
+            }
+        })
+
     }
 </script>
 
@@ -164,12 +241,12 @@
     <p>
     <h1>All Clients</h1>
 
-    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#CreateClient">
+    <button id="deleteSelectedBtn" type="button" class="btn btn-danger" data-toggle="modal" data-target="#RegisterClientForm">
         <i class="fa fa-trash" aria-hidden="true"></i> Delete Selected Clients
     </button>
 
     <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#CreateClient">
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#RegisterClientForm">
         <i class="fa fa-plus" aria-hidden="true"></i> Create Client
     </button>
 
@@ -197,8 +274,8 @@
     </div>
 
     <!-- Modal Register Client -->
-    <div class="modal fade" id="CreateClient" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
-        aria-hidden="true">
+    <div class="modal fade" id="RegisterClientForm" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -229,7 +306,7 @@
                             <label for="inputAddress" class="col-sm-2 col-form-label">Phone</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" name="phone" id="phone"
-                                    placeholder="(xx)xxxxxxxxx">
+                                    placeholder="(99) 99999-9999" oninput="inputPhone('#phone')">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -249,6 +326,69 @@
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="submit" value="Enviar" class="btn btn-primary">Create</button>
                     </form>
+
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Update Client -->
+    <div class="modal fade" id="UpdateClientForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Client</h5>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <!-- Form Update Client-->
+                    <form class="user" action="clientes.html" method="PUT" onsubmit="putClient(event)">
+                        <div class="form-group row">
+                            <label for="inputName" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="putName" id="putName"
+                                    placeholder="Full name">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputAddress" class="col-sm-2 col-form-label">Address</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="putAddress" id="putAddress"
+                                    placeholder="Road n°,Neighborhood,City,State,Country">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputAddress" class="col-sm-2 col-form-label">Phone</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="putPhone" id="putPhone"
+                                    placeholder="(99) 99999-9999" oninput="inputPhone('#putPhone')">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                            <div class="col-sm-10">
+                                <input type="email" class="form-control" name="putEmail" id="putEmail"
+                                    placeholder="exemple@company.com">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputAddress" class="col-sm-2 col-form-label">SSN</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="putSsn" id="putSsn"
+                                    placeholder="Social Security Number">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" value="Enviar" class="btn btn-primary">Update</button>
+                    </form>
+
                 </div>
                 <div class="modal-footer">
                 </div>
@@ -276,18 +416,7 @@
     </table>
 
 
-    <script src="https://code.jquery.com/jquery-3.5.1.js"
-        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
 
-    <script>
-
-    </script>
 </body>
 
 </html>

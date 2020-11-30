@@ -25,7 +25,7 @@ public class ClientService {
 
 	public Object add(Request request, Response response) {
 		Object resp = null;
-
+		
 		String nome = request.queryParams("nome");
 		String endereco = request.queryParams("endereco");
 		String celular = request.queryParams("celular");
