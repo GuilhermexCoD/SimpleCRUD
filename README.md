@@ -21,6 +21,8 @@ To use this application you will need
 To Start the backend using VS CODE run Aplication.java
 Then press to go live on the client.html
 
+Check CRUD_API_Endpoints.pdf for endpoint informations
+
 # SimpleCRUD
 Criando uma simples CRUD para gerenciar clientes.
 
@@ -44,5 +46,5 @@ Para usar esta aplicação vai ser necessário
 Para iniciar o Backend utilize o VS CODE e rode o Aplication.java
 no Frontend abra o arquivo clientes.html e aperte em Go Live
 
-
+Verificar CRUD_API_Endpoints.pdf para informações dos endpoint
 
