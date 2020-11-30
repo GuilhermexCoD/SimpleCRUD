@@ -119,7 +119,9 @@ public class ClientService {
             json.put("id", id);
             json.put("nome", client.getNome());
 
-            resp = json;
+			resp = json;
+			response.status(200); // ok
+				
             
         } else {
             response.status(404); // 404 Not found

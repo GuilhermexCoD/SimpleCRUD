@@ -24,6 +24,7 @@
 
     window.onload = function () {
         buildClientTable('clients');
+
     }
 
     function addIdToPath(form_name) {
@@ -33,7 +34,7 @@
         your_form.action = action_src;
     }
 
-    function buildClientTable(id) {
+    function buildClientTable(tableId) {
         console.log("Carregando clientes da API");
 
         fetch("http://localhost:6790/api/clientes").then(
@@ -41,7 +42,7 @@
 
                 return response.text().then(function (text) {
 
-                    let table = document.getElementById(id);
+                    let table = document.getElementById(tableId);
 
                     obj = text;
                     obj = JSON.parse(obj);
@@ -60,7 +61,7 @@
                             <td>${obj[i].email}</td>
                             <td>${obj[i].cpf}</td>
                             <td>
-                                <button type="button" onclick="readClient('${obj[i].id}');" class="btn btn-info">Read</button>
+                                <button type="button" data-toggle="modal" data-target="#ReadClient" onclick="readClient('${obj[i].id}')" class="btn btn-info">Read</button>
                                 <button type="button" onclick="editClient('${obj[i].id}');" class="btn btn-warning">Edit</button>
                                 <button type="button" onclick="deleteClient('${obj[i].id}');" class="btn btn-danger">Delete</button> 
                             </td>
@@ -73,16 +74,78 @@
 
     }
 
-    function readClient(id){
-        console.log(`read id ${id}`);
+    function postClient(e) {
+
+        console.log('Creating Client');
+
+        e.preventDefault();
+
+        dados = {
+            "nome": $("#name").val(),
+            "endereco": $("#address").val(),
+            "celular": $("#phone").val(),
+            "email": $("#email").val(),
+            "cpf": $("#ssn").val()
+        }
+
+
+        $.post("http://localhost:6790/api/clientes", dados, function (data) {
+            obj = data;
+            sucesso("Cadastrado com sucesso!")
+        });
     }
 
-    function editClient(id){
+    function readClient(id) {
+        console.log(`read id ${id}`);
+
+        fetch(`http://localhost:6790/api/clientes/${id}`).then(
+            function (response) {
+
+                return response.text().then(function (text) {
+
+                    obj = text;
+                    obj = JSON.parse(obj);
+
+                    console.log(obj);
+
+                    readTitle.innerText = obj.nome;
+
+                    readClientDiv.innerHTML = `
+                        <p>Address: ${obj.endereco}</p>
+                        <p>Phone: ${obj.celular}</p>
+                        <p>E-mail: ${obj.email}</p>
+                        <p>SSN: ${obj.cpf}</p>
+                        `;
+
+                });
+            });
+    }
+
+    function editClient(id) {
         console.log(`edit id ${id}`);
     }
 
-    function deleteClient(id){
+    function deleteClient(id) {
         console.log(`delete id ${id}`);
+
+        fetch(`http://localhost:6790/api/clientes/${id}`,{
+            method: 'DELETE',
+            headers: {
+                'Content-type': 'application/json',
+                'Access-Control-Allow-Methods': 'DELETE'
+            }
+        }).then(
+            function (response) {
+
+                return response.text().then(function (text) {
+
+                    obj = text;
+                    obj = JSON.parse(obj);
+
+                    console.log(`Delete: ${obj}`);
+
+                });
+            });
     }
 </script>
 
@@ -112,7 +175,28 @@
 
     </p>
 
-    <!-- Modal -->
+    <!-- Modal Read Client -->
+    <div class="modal fade" id="ReadClient" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="readTitle">Client Info</h5>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id="readClientDiv" class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Register Client -->
     <div class="modal fade" id="CreateClient" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -137,25 +221,29 @@
                         <div class="form-group row">
                             <label for="inputAddress" class="col-sm-2 col-form-label">Address</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="address" id="address" placeholder="Road n°,Neighborhood,City,State,Country">
+                                <input type="text" class="form-control" name="address" id="address"
+                                    placeholder="Road n°,Neighborhood,City,State,Country">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="inputAddress" class="col-sm-2 col-form-label">Phone</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="phone" id="phone" placeholder="(xx)xxxxxxxxx">
+                                <input type="text" class="form-control" name="phone" id="phone"
+                                    placeholder="(xx)xxxxxxxxx">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
                             <div class="col-sm-10">
-                                <input type="email" class="form-control" name="email" id="email" placeholder="exemple@company.com">
+                                <input type="email" class="form-control" name="email" id="email"
+                                    placeholder="exemple@company.com">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="inputAddress" class="col-sm-2 col-form-label">SSN</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="ssn" id="ssn" placeholder="Social Security Number">
+                                <input type="text" class="form-control" name="ssn" id="ssn"
+                                    placeholder="Social Security Number">
                             </div>
                         </div>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -198,27 +286,6 @@
         crossorigin="anonymous"></script>
 
     <script>
-
-        function postClient(e){
-
-            console.log('Creating Client');
-            
-            e.preventDefault();
-                dados = {
-                    "nome":$("#name").val(),
-                    "endereco":$("#address").val(),
-                    "celular":$("#phone").val(),
-                    "email":$("#email").val(),
-                    "cpf":$("#ssn").val()
-                }
-
-
-                $.post("http://localhost:6790/api/clientes", dados,function (data) {
-                    obj = data;
-                    sucesso("Cadastrado com sucesso!")
-                    window.location.href = 'login.html'; 
-                });
-        }
 
     </script>
 </body>

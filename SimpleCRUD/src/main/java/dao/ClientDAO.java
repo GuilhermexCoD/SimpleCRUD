@@ -24,7 +24,6 @@ public class ClientDAO {
 		file = new File(filename);
 		clients = new ArrayList<Client>();
 		
-        //TODO if the files doesnt exists
 		if (file.exists()) {
 			readFromFile();
 		}
